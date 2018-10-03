@@ -50,11 +50,11 @@ public class OI {
   }
 
 public double getLeftY(){
-  return controller.getRawAxis(1);
+  return -controller.getRawAxis(1);
 }
 
 public double getRightY(){
-  return controller.getRawAxis(5);
+  return -controller.getRawAxis(5);
 }
 
 }

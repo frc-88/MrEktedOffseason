@@ -32,6 +32,10 @@ public class RobotMap {
   public static final int RIGHT_FOLLOWER00_DRIVE_ID = 22;
   public static final int RIGHT_FOLLOWER01_DRIVE_ID = 23;
   public static final int RIGHT_FOLLOWER02_DRIVE_ID = 21;
+  
+  public static final int DRIVETRAIN_SCALING_EXPONENT = 2;
 
+  public static final double DRIVE_VOLTAGE_LIMIT = 0.83;
 
+  public static final double CAN_TIMEOUT = 1; //in milliseconds
 }

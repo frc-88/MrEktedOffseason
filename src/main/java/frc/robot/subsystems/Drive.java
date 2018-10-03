@@ -12,6 +12,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import frc.robot.*;
+import frc.robot.commands.*;
+import frc.robot.Utils.*;
 
 /**
  * An example subsystem.  You can replace me with your own Subsystem.
@@ -43,12 +45,14 @@ rightFollower2.follow(right);
 }
 
 public void drive (double leftSpd,double rightSpd) {
-left.set(ControlMode.PercentOutput, leftSpd);
+leftSpd = DriveUtils.signedPow(leftSpd,RobotMap.DRIVETRAIN_SCALING_EXPONENT);
+rightSpd = DriveUtils.signedPow(rightSpd,RobotMap.DRIVETRAIN_SCALING_EXPONENT);
+
+left.set(ControlMode.PercentOutput, -leftSpd);
 right.set(ControlMode.PercentOutput, rightSpd);
 }
   @Override
   public void initDefaultCommand() {
-    // Set the default command for a subsystem here.
-    // setDefaultCommand(new MySpecialCommand());
+   setDefaultCommand (new TankDrive());
   }
 }
