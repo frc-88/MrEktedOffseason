@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+
 import frc.robot.*;
 import frc.robot.commands.*;
 import frc.robot.Utils.*;
@@ -42,6 +44,21 @@ leftFollower2.follow(left);
 rightFollower0.follow(right);
 rightFollower1.follow(right);
 rightFollower2.follow(right);
+
+left.configPeakOutputForward(RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT);
+left.configPeakOutputReverse(-RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT);
+
+right.configPeakOutputForward(RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT);
+right.configPeakOutputReverse(-RobotMap.DRIVE_VOLTAGE_LIMIT,RobotMap. CAN_TIMEOUT);
+
+left.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, RobotMap.CAN_TIMEOUT);
+right.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, RobotMap.CAN_TIMEOUT);
+
+DataCollection.addInt(()-> left.getSelectedSensorVelocity(0));
+DataCollection.addInt(()-> right.getSelectedSensorVelocity(0));
+
+DataCollection.addDouble(()-> left.getOutputCurrent());
+DataCollection.addDouble(()-> right.getOutputCurrent());
 }
 
 public void drive (double leftSpd,double rightSpd) {

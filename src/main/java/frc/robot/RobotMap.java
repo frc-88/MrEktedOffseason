@@ -37,5 +37,5 @@ public class RobotMap {
 
   public static final double DRIVE_VOLTAGE_LIMIT = 0.83;
 
-  public static final double CAN_TIMEOUT = 1; //in milliseconds
+  public static final int CAN_TIMEOUT = 1; //in milliseconds
 }
