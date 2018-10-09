@@ -7,11 +7,16 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Utils.DataCollection;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Drive;
@@ -25,7 +30,7 @@ import frc.robot.subsystems.Drive;
  */
 public class Robot extends TimedRobot {
   public static ExampleSubsystem m_subsystem = new ExampleSubsystem();
-  public static Drive m_drive = new Drive();
+  public static Drive m_drive ;
   public static OI m_oi;
 
   Command m_autonomousCommand;
@@ -41,6 +46,17 @@ public class Robot extends TimedRobot {
     m_chooser.addDefault("Default Auto", new ExampleCommand());
     // chooser.addObject("My Auto", new MyAutoCommand());
     SmartDashboard.putData("Auto mode", m_chooser);
+
+    try{
+      DataCollection.initialize();
+      } catch(IOException e){
+        e.printStackTrace();
+      }
+
+      m_drive = new Drive();
+
+      DataCollection.addBoolean(()-> RobotController.isBrownedOut());
+      DataCollection.addDouble(()-> RobotController.getBatteryVoltage());
   }
 
   /**
@@ -53,6 +69,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    try{
+    DataCollection.recordData();
+    } catch(IOException e){
+      e.printStackTrace();
+    }
+
   }
 
   /**
