@@ -47,16 +47,19 @@ public class Robot extends TimedRobot {
     // chooser.addObject("My Auto", new MyAutoCommand());
     SmartDashboard.putData("Auto mode", m_chooser);
 
+    /*
     try{
       DataCollection.initialize();
       } catch(IOException e){
         e.printStackTrace();
       }
-
+      */
       m_drive = new Drive();
 
+      /*
       DataCollection.addBoolean(()-> RobotController.isBrownedOut());
       DataCollection.addDouble(()-> RobotController.getBatteryVoltage());
+      */
   }
 
   /**
@@ -69,11 +72,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+   
+   /*
     try{
     DataCollection.recordData();
     } catch(IOException e){
       e.printStackTrace();
     }
+    */
 
   }
 
@@ -149,7 +155,13 @@ public class Robot extends TimedRobot {
   /**
    * This function is called periodically during test mode.
    */
+   double voltage = 0;
+
   @Override
   public void testPeriodic() {
+    // voltage += .0001;
+    // System.out.println (voltage);
+    // m_drive.drive(voltage,-voltage);
+    m_drive.pidDrive(12000,12000);
   }
 }

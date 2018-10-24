@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.subsystems.Drive;
 import frc.robot.Robot;
 
-public class TankDrive extends Command {
+public class ArcadeDrive extends Command {
   private Drive drive=Robot.m_drive;
-  public TankDrive() {
+  public ArcadeDrive() {
     requires(drive);
   }
 
@@ -25,15 +25,12 @@ public class TankDrive extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    double left = Robot.m_oi.getLeftY();
-    double right = Robot.m_oi.getRightY();
-
-  
-
- 
+    double leftSpd = Robot.m_oi.getLeftY();
+    double rightTurn = Robot.m_oi.getRightX();
     
 
-    drive.tankDrive(left, right);
+
+    drive.arcadeDrive(leftSpd, rightTurn);
     
   }
 

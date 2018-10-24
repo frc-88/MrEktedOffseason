@@ -47,29 +47,87 @@ rightFollower2.follow(right);
 
 left.configPeakOutputForward(RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT);
 left.configPeakOutputReverse(-RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT);
+left.configContinuousCurrentLimit(25, RobotMap.CAN_TIMEOUT);
+left.configPeakCurrentLimit(25, RobotMap.CAN_TIMEOUT);
+left.configPeakCurrentDuration(0, RobotMap.CAN_TIMEOUT);
+
+left.configOpenloopRamp(.125, RobotMap.CAN_TIMEOUT);
+left.configClosedloopRamp(.125, RobotMap.CAN_TIMEOUT);
 
 right.configPeakOutputForward(RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT);
 right.configPeakOutputReverse(-RobotMap.DRIVE_VOLTAGE_LIMIT,RobotMap. CAN_TIMEOUT);
+right.configContinuousCurrentLimit(25, RobotMap.CAN_TIMEOUT);
+right.configPeakCurrentLimit(25, RobotMap.CAN_TIMEOUT);
+right.configPeakCurrentDuration(0, RobotMap.CAN_TIMEOUT);
+
+right.configOpenloopRamp(.125, RobotMap.CAN_TIMEOUT);
+right.configClosedloopRamp(.125, RobotMap.CAN_TIMEOUT);
 
 left.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, RobotMap.CAN_TIMEOUT);
 right.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, RobotMap.CAN_TIMEOUT);
 
+/*
 DataCollection.addInt(()-> left.getSelectedSensorVelocity(0));
 DataCollection.addInt(()-> right.getSelectedSensorVelocity(0));
 
 DataCollection.addDouble(()-> left.getOutputCurrent());
 DataCollection.addDouble(()-> right.getOutputCurrent());
+*/
+
 }
 
 public void drive (double leftSpd,double rightSpd) {
-leftSpd = DriveUtils.signedPow(leftSpd,RobotMap.DRIVETRAIN_SCALING_EXPONENT);
-rightSpd = DriveUtils.signedPow(rightSpd,RobotMap.DRIVETRAIN_SCALING_EXPONENT);
-
 left.set(ControlMode.PercentOutput, -leftSpd);
 right.set(ControlMode.PercentOutput, rightSpd);
 }
+
+public void pidDrive (double leftSpd,double rightSpd) {
+  left.set(ControlMode.Velocity, -leftSpd);
+  right.set(ControlMode.Velocity, rightSpd);
+  System.out.println(leftSpd + " "+ rightSpd);
+  // System.out.println(left.getSelectedSensorVelocity(0) + " " + right.getSelectedSensorVelocity(0));
+  }
+
+public void tankDrive (double leftSpd,double rightSpd) {
+  //System.out.println(leftSpd + " " + rightSpd);
+//leftSpd = DriveUtils.signedPow(leftSpd,RobotMap.DRIVETRAIN_SCALING_EXPONENT);
+//rightSpd = DriveUtils.signedPow(rightSpd,RobotMap.DRIVETRAIN_SCALING_EXPONENT);
+//drive(leftSpd, rightSpd);
+double turn=(rightSpd-leftSpd)/2;
+double spd=(rightSpd+leftSpd)/2;
+arcadeDrive(spd,turn);
+// System.out.println(turn + " " + spd);
+}
+public double deadbandExponential(double spd,int exp,double deadband){
+  return DriveUtils.signedPow(spd, exp) * (1-deadband) + Math.signum(spd) * deadband ;
+}
+
+public void arcadeDrive(double spd, double turnSpd){
+
+
+  spd = deadbandExponential(spd, RobotMap.DRIVETRAIN_SCALING_EXPONENT, RobotMap.DRIVETRAIN_SPEED_DEADBAND);
+  turnSpd = deadbandExponential(turnSpd, RobotMap.DRIVETRAIN_TURN_SCALING_EXPONENT, RobotMap.DRIVETRAIN_TURN_DEADBAND);
+  // System.out.println(turnSpd + " " + spd);
+  
+
+double leftSpd= spd- spd*turnSpd;
+double rightSpd=spd+ spd*turnSpd;
+
+if (spd == 0){
+  leftSpd = -turnSpd;
+  rightSpd = turnSpd;
+  System.out.println(leftSpd + "   " + rightSpd);
+}
+
+
+
+leftSpd *= RobotMap.MAX_SPEED;
+rightSpd *= RobotMap.MAX_SPEED;
+
+pidDrive(leftSpd, rightSpd);
+
+}
   @Override
   public void initDefaultCommand() {
-   setDefaultCommand (new TankDrive());
-  }
-}
+   setDefaultCommand (new ArcadeDrive());
+  }}

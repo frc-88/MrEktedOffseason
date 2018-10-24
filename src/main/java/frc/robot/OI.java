@@ -50,11 +50,21 @@ public class OI {
   }
 
 public double getLeftY(){
-  return -controller.getRawAxis(1);
+  double ret= -controller.getRawAxis(1);
+  if (Math.abs(ret)>= .05) return ret;
+  else return 0;
 }
 
 public double getRightY(){
-  return -controller.getRawAxis(5);
+  double ret= -controller.getRawAxis(5);
+  if (Math.abs(ret)>= .05) return ret;
+  else return 0;
+  
 }
+public double getRightX(){
+  double ret= -controller.getRawAxis(4);
+  if (Math.abs(ret)>= .05) return ret;
+  else return 0;
 
+}
 }
