@@ -7,9 +7,14 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
+import javax.print.attribute.standard.RequestingUserName;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
@@ -26,6 +31,8 @@ public class Drive extends Subsystem {
 
 TalonSRX left,right;
 VictorSPX leftFollower0, leftFollower1, leftFollower2, rightFollower0, rightFollower1, rightFollower2; 
+
+NetworkTableEntry leftCommandedVoltage, rightCommandedVoltage, leftSpd, rightSpd, leftCurrent, rightCurrent;
 
 
 public Drive () {
@@ -50,6 +57,9 @@ left.configPeakOutputReverse(-RobotMap.DRIVE_VOLTAGE_LIMIT, RobotMap.CAN_TIMEOUT
 left.configContinuousCurrentLimit(25, RobotMap.CAN_TIMEOUT);
 left.configPeakCurrentLimit(25, RobotMap.CAN_TIMEOUT);
 left.configPeakCurrentDuration(0, RobotMap.CAN_TIMEOUT);
+left.configVoltageCompSaturation(12, RobotMap.CAN_TIMEOUT);
+left.enableVoltageCompensation(true);
+
 
 left.configOpenloopRamp(.125, RobotMap.CAN_TIMEOUT);
 left.configClosedloopRamp(.125, RobotMap.CAN_TIMEOUT);
@@ -59,6 +69,8 @@ right.configPeakOutputReverse(-RobotMap.DRIVE_VOLTAGE_LIMIT,RobotMap. CAN_TIMEOU
 right.configContinuousCurrentLimit(25, RobotMap.CAN_TIMEOUT);
 right.configPeakCurrentLimit(25, RobotMap.CAN_TIMEOUT);
 right.configPeakCurrentDuration(0, RobotMap.CAN_TIMEOUT);
+right.configVoltageCompSaturation(12, RobotMap.CAN_TIMEOUT);
+right.enableVoltageCompensation(true);
 
 right.configOpenloopRamp(.125, RobotMap.CAN_TIMEOUT);
 right.configClosedloopRamp(.125, RobotMap.CAN_TIMEOUT);
@@ -73,6 +85,13 @@ DataCollection.addInt(()-> right.getSelectedSensorVelocity(0));
 DataCollection.addDouble(()-> left.getOutputCurrent());
 DataCollection.addDouble(()-> right.getOutputCurrent());
 */
+
+leftCommandedVoltage=Robot.dataTable.getEntry("leftCommandVoltage");
+rightCommandedVoltage=Robot.dataTable.getEntry("rightCommandVoltage");
+leftSpd=Robot.dataTable.getEntry("leftSpd");
+rightSpd=Robot.dataTable.getEntry("rightSpd");
+leftCurrent=Robot.dataTable.getEntry("leftCurrent");
+rightCurrent=Robot.dataTable.getEntry("rightCurrent");
 
 }
 
@@ -95,8 +114,24 @@ public void tankDrive (double leftSpd,double rightSpd) {
 //drive(leftSpd, rightSpd);
 double turn=(rightSpd-leftSpd)/2;
 double spd=(rightSpd+leftSpd)/2;
-arcadeDrive(spd,turn);
+
 // System.out.println(turn + " " + spd);
+
+spd = deadbandExponential(spd, RobotMap.DRIVETRAIN_SCALING_EXPONENT, RobotMap.DRIVETRAIN_SPEED_DEADBAND);
+turn = deadbandExponential(turn, RobotMap.DRIVETRAIN_TURN_SCALING_EXPONENT, RobotMap.DRIVETRAIN_TURN_DEADBAND);
+// System.out.println(turnSpd + " " + spd);
+
+
+leftSpd= spd- turn;
+rightSpd=spd+ turn;
+
+
+
+
+leftSpd *= RobotMap.MAX_SPEED;
+rightSpd *= RobotMap.MAX_SPEED;
+
+pidDrive(leftSpd, rightSpd);
 }
 public double deadbandExponential(double spd,int exp,double deadband){
   return DriveUtils.signedPow(spd, exp) * (1-deadband) + Math.signum(spd) * deadband ;
@@ -109,15 +144,10 @@ public void arcadeDrive(double spd, double turnSpd){
   turnSpd = deadbandExponential(turnSpd, RobotMap.DRIVETRAIN_TURN_SCALING_EXPONENT, RobotMap.DRIVETRAIN_TURN_DEADBAND);
   // System.out.println(turnSpd + " " + spd);
   
+turnSpd=cheesyTurn(spd,turnSpd);
+double leftSpd= spd- turnSpd;
+double rightSpd=spd+ turnSpd;
 
-double leftSpd= spd- spd*turnSpd;
-double rightSpd=spd+ spd*turnSpd;
-
-if (spd == 0){
-  leftSpd = -turnSpd;
-  rightSpd = turnSpd;
-  System.out.println(leftSpd + "   " + rightSpd);
-}
 
 
 
@@ -125,9 +155,31 @@ leftSpd *= RobotMap.MAX_SPEED;
 rightSpd *= RobotMap.MAX_SPEED;
 
 pidDrive(leftSpd, rightSpd);
-
 }
+public double cheesyTurn(double spd, double turnRate){
+  if(spd==0){
+    return turnRate;
+  
+  }
+  else{
+    return spd*turnRate;
+  }
+  
+  
+  }
   @Override
   public void initDefaultCommand() {
-   setDefaultCommand (new ArcadeDrive());
-  }}
+   setDefaultCommand (new TankDrive());
+  }
+
+  public void sendData(){
+leftCommandedVoltage.setDouble(left.getMotorOutputVoltage());
+rightCommandedVoltage.setDouble(right.getMotorOutputVoltage());
+leftSpd.setDouble(left.getSelectedSensorVelocity(0));
+rightSpd.setDouble(right.getSelectedSensorVelocity(0));
+leftCurrent.setDouble(left.getOutputCurrent());
+rightCurrent.setDouble(right.getOutputCurrent());
+
+
+  }
+}

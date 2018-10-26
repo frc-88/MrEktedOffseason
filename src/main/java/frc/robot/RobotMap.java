@@ -35,6 +35,8 @@ public class RobotMap {
   
   public static final int DRIVETRAIN_SCALING_EXPONENT = 2;
   public static final int DRIVETRAIN_TURN_SCALING_EXPONENT = 3;
+  public static final double DRIVETRAIN_SPEED_DEADBAND = .083;
+  public static final double DRIVETRAIN_TURN_DEADBAND = .133;
 
   public static final double DRIVE_VOLTAGE_LIMIT = 0.83;
 
